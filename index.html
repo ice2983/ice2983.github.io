@@ -12,6 +12,15 @@
     .unavailable {
       color: red;
     }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid black;
+      padding: 8px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -23,22 +32,34 @@
     const csvFiles = ["IP状态.csv"];
 
     csvFiles.forEach(file => {
-      fetch(`public/${file}`)
+      fetch(file)
         .then(response => response.text())
         .then(csvData => {
           const parsedData = Papa.parse(csvData, { header: true });
           const container = document.getElementById("csv-container");
-          
-          let table = "<table border='1'><thead><tr><th>域名</th><th>状态</th></tr></thead><tbody>";
 
-          // 添加数据
+          let table = "<table><thead><tr><th>域名</th><th>状态</th><th>域名</th><th>状态</th><th>域名</th><th>状态</th></tr></thead><tbody>";
+
+          let rowData = [];
+          
           parsedData.data.forEach(row => {
             let statusClass = row['状态'] === '可用' ? 'available' : 'unavailable';
-            table += `<tr>
-                        <td>${row['域名']}</td>
-                        <td class="${statusClass}">${row['状态']}</td>
-                      </tr>`;
+            rowData.push(`<td>${row['域名']}</td><td class="${statusClass}">${row['状态']}</td>`);
+            
+            // 每 3 组 (6 个单元格) 组成一行
+            if (rowData.length === 6) {
+              table += `<tr>${rowData.join("")}</tr>`;
+              rowData = []; // 清空行数据，准备下一行
+            }
           });
+
+          // 如果最后剩余的数据不足 6 个单元格，则补全空单元格
+          if (rowData.length > 0) {
+            while (rowData.length < 6) {
+              rowData.push("<td></td><td></td>");
+            }
+            table += `<tr>${rowData.join("")}</tr>`;
+          }
 
           table += "</tbody></table>";
           container.innerHTML += table;
