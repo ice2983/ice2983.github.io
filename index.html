@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV Display</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+</head>
+<body>
+  <h1>CSV Files Display</h1>
+  <div id="csv-container"></div>
+
+  <script>
+    // 假设我们将 CSV 文件命名为 file1.csv 和 file2.csv
+    const csvFiles = ["file1.csv", "file2.csv"];
+
+    csvFiles.forEach(file => {
+      fetch(`public/${file}`)
+        .then(response => response.text())
+        .then(csvData => {
+          const parsedData = Papa.parse(csvData, { header: true });
+          const container = document.getElementById("csv-container");
+          
+          let table = "<h2>" + file + "</h2><table border='1'><thead><tr>";
+
+          // 添加表头
+          parsedData.meta.fields.forEach(field => {
+            table += `<th>${field}</th>`;
+          });
+          table += "</tr></thead><tbody>";
+
+          // 添加数据
+          parsedData.data.forEach(row => {
+            table += "<tr>";
+            parsedData.meta.fields.forEach(field => {
+              table += `<td>${row[field]}</td>`;
+            });
+            table += "</tr>";
+          });
+
+          table += "</tbody></table>";
+          container.innerHTML += table;
+        });
+    });
+  </script>
+</body>
+</html>
