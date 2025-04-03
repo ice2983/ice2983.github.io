@@ -3,58 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>域名是否可用</title>
+  <title>CSV Display</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
   <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border: 1px solid #ddd;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
     .available {
       color: green;
     }
     .unavailable {
       color: red;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
-    }
-    th {
-      background-color: #f2f2f2;
-    }
   </style>
 </head>
 <body>
-  <h1>域名是否可用</h1>
+  <h1>CSV 数据展示</h1>
   <div id="csv-container"></div>
 
   <script>
-    // 读取 CSV 文件
-    fetch('IP状态.csv')  // 假设 CSV 文件名为 'IP状态.csv'
-      .then(response => response.text())
-      .then(csvData => {
-        // 使用 PapaParse 解析 CSV 数据
-        const parsedData = Papa.parse(csvData, { header: true });
-        const container = document.getElementById("csv-container");
+    // 假设我们将 CSV 文件命名为 IP状态.csv
+    const csvFiles = ["IP状态.csv"];
 
-        // 创建表格并添加表头
-        let table = "<table><thead><tr><th>域名</th><th>状态</th></tr></thead><tbody>";
+    csvFiles.forEach(file => {
+      fetch(file)  // 直接从文件路径加载 CSV
+        .then(response => response.text())
+        .then(csvData => {
+          const parsedData = Papa.parse(csvData, { header: true, skipEmptyLines: true }); // 解析 CSV 数据
+          const container = document.getElementById("csv-container");
 
-        // 遍历每一行数据并添加到表格
-        parsedData.data.forEach(row => {
-          let statusClass = row['状态'] === '可用' ? 'available' : 'unavailable';  // 判断状态
-          table += `<tr>
-                      <td>${row['域名']}</td>
-                      <td class="${statusClass}">${row['状态']}</td>
-                    </tr>`;
-        });
+          // 创建表格并添加表头
+          let table = "<table><thead><tr>";
 
-        table += "</tbody></table>";  // 结束表格
-        container.innerHTML = table;  // 将表格添加到页面中
-      })
-      .catch(error => console.error('Error loading CSV file:', error));  // 错误处理
+          // 添加表头（从 CSV 文件中提取字段）
+          parsedData.meta.fields.forEach(field => {
+            table += `<th>${field}</th>`;
+          });
+          table += "</tr></thead><tbody>";
+
+          // 遍历数据并为每一行生成表格内容
+          parsedData.data.forEach(row => {
+            let statusClass = row['状态'] === '可用' ? 'available' : 'unavailable'; // 根据状态决定颜色
+            table += `<tr>
+                        <td>${row['域名']}</td>
+                        <td class="${statusClass}">${row['状态']}</td>
+                      </tr>`;
+          });
+
+          table += "</tbody></table>";  // 结束表格
+          container.innerHTML = table;  // 将表格插入到页面中
+        })
+        .catch(error => console.error('读取 CSV 文件出错:', error)); // 错误处理
+    });
   </script>
 </body>
 </html>
