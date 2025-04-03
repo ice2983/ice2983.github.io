@@ -5,29 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CSV Display</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-  <style>
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th, td {
-      padding: 8px;
-      text-align: left;
-      border: 1px solid #ddd;
-    }
-    th {
-      background-color: #f2f2f2;
-    }
-    .available {
-      color: green;
-    }
-    .unavailable {
-      color: red;
-    }
-  </style>
 </head>
 <body>
-  <h1>CSV 数据展示</h1>
+  <h1>CSV Files Display</h1>
   <div id="csv-container"></div>
 
   <script>
@@ -35,36 +15,32 @@
     const csvFiles = ["IP状态.csv"];
 
     csvFiles.forEach(file => {
-      fetch(file)  // 直接从文件路径加载 CSV
+      fetch(`public/${file}`)
         .then(response => response.text())
         .then(csvData => {
-          const parsedData = Papa.parse(csvData, { header: true, skipEmptyLines: true }); // 解析 CSV 数据
+          const parsedData = Papa.parse(csvData, { header: true });
           const container = document.getElementById("csv-container");
+          
+          let table = "<h2>" + file + "</h2><table border='1'><thead><tr>";
 
-          // 创建表格并添加表头
-          let table = "<table><thead><tr>";
-
-          // 添加表头（从 CSV 文件中提取字段）
+          // 添加表头
           parsedData.meta.fields.forEach(field => {
             table += `<th>${field}</th>`;
           });
           table += "</tr></thead><tbody>";
 
-          // 遍历数据并为每一行生成表格内容
+          // 添加数据
           parsedData.data.forEach(row => {
-            let statusClass = row['状态'] === '可用' ? 'available' : 'unavailable'; // 根据状态决定颜色
-            table += `<tr>
-                        <td>${row['域名']}</td>
-                        <td class="${statusClass}">${row['状态']}</td>
-                      </tr>`;
+            table += "<tr>";
+            parsedData.meta.fields.forEach(field => {
+              table += `<td>${row[field]}</td>`;
+            });
+            table += "</tr>";
           });
 
-          table += "</tbody></table>";  // 结束表格
-          container.innerHTML = table;  // 将表格插入到页面中
-        })
-        .catch(error => console.error('读取 CSV 文件出错:', error)); // 错误处理
+          table += "</tbody></table>";
+          container.innerHTML += table;
+        });
     });
   </script>
 </body>
-</html>
-
