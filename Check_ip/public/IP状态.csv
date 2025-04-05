@@ -36,8 +36,8 @@ s11.serv00.com,可用
 web11.serv00.com,可用
 cache11.serv00.com,可用
 s12.serv00.com,不可用
-web12.serv00.com,可用
-cache12.serv00.com,可用
+web12.serv00.com,检测失败
+cache12.serv00.com,检测失败
 s13.serv00.com,可用
 web13.serv00.com,可用
 cache13.serv00.com,可用
